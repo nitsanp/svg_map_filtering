@@ -1,5 +1,6 @@
 # svg_map_filtering
 
+creating a filtered html from azgaar's fantasy map svg file.
 
 -----------------svg map filtering-----------------
 
