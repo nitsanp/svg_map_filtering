@@ -96,4 +96,4 @@ def filter_HTML(html_map):
 svg_map = openFile(map_path)
 html_map = createHtmlMapFile(svg_map)
 result = filter_HTML(html_map)
-writeFile(lxml.html.tostring(result, pretty_print=False, encoding='unicode'), f)
+writeFile(lxml.html.tostring(result, pretty_print=False, encoding='unicode'), final_html)
