@@ -39,61 +39,81 @@ def createHtmlMapFile(svg_map):
 	return doc.getvalue()
 
 #jQuery filters
+def attribInListNoChildren(el, myList):
+	if el.attrib['id'] in myList and len(el)==0:
+		return True
+	return False
+
+def attribInList(el, myList):
+	if el.attrib['id'] in myList:
+		return True
+	return False
+
+def removeElement(el):
+	print('removed:', el.attrib['id'], len(el))
+	el.drop_tree()
+
+def removeParent(el):
+	print('removed parent of:', el.attrib['id'])
+	el.getparent().remove()
+
 def styleDisplayIsNone(root):
 	# check for display="none" style
 	for el in root.iter('g'):
 		try:
 			if 'display:none' in el.attrib['style']:
-				print("removed:", el.attrib['style'])
-				el.drop_tree()
+				removeElement(el)
 		except:
 			continue
+
 
 def displayIsNone(root):
 # 	#check for display="none"
 	for el in root.iter('g'):
 		try:
 			if 'none' in el.attrib['display']:
-				print("removed:", el.attrib['display'])
-				el.drop_tree()
+				removeElement(el)
 		except:
 			continue
+
 
 def hasChildren(root):
 # 	# check if does not have children
 	ids = ['compass', 'gridOverlay', 'terrs', 'biomes', 'cells', 
 			'coordinates', 'cults', 'temperature', 'rural', 'urban',
 			'towns', 'cities']
+	population = ['rural', 'urban']
+	burgLabels = ['towns', 'cities']
 
 	for el in root.iter('g'):
 		try:
-			if(el.attrib['id'] in ids):
-				if not len(el):
-					# general
-					print('removed:', len(el))
-					el.drop_tree()
-					# population
-					if el.attrib['id'] == 'rural' or el.attrib['id'] == 'urban':
-						print('removed population:', el)
-						el.getparent().remove()
-					# burg labels
-					if el.attrib['id']== 'towns' or el.attrib['id'] == 'cities':
-						print('removed burgLabels:', el)
-						el.getparent().remove()
+			if attribInListNoChildren(el, ids):
+				# general
+				removeElement(el)
+				# population
+				if attribInListNoChildren(el, population):
+					removeParent(el)
+				# burg labels
+				if attribInListNoChildren(el, burgLabels):
+					removeParent(el)
 		except:
 			continue
 
 #filter HTML
-def filter_HTML(html_map):
+def filterHTML(html_map):
 	root = lxml.html.fromstring(html_map)
 	styleDisplayIsNone(root)
 	displayIsNone(root)
 	hasChildren(root)
 	return root
 
+#html to string
+def htmlToString(html):
+	return lxml.html.tostring(html, pretty_print=False, encoding='unicode')
+
 
 
 svg_map = openFile(map_path)
 html_map = createHtmlMapFile(svg_map)
-result = filter_HTML(html_map)
-writeFile(lxml.html.tostring(result, pretty_print=False, encoding='unicode'), final_html)
+result = filterHTML(html_map)
+writeFile(htmlToString(result), final_html)
